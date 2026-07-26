@@ -1,0 +1,174 @@
+.mainTitleSection {
+    width: 85%;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 15px;
+
+    text-align: center;
+
+    margin: auto;
+}
+
+.mainTitle {
+    font-size: var(--text-3xl);
+
+    font-weight: var(--weight-bold);
+
+    color: var(--color-main-text);
+
+    line-height: 1.1;
+
+    span {
+        color: var(--color-main-green);
+    }
+}
+
+.mainText {
+    color: var(--color-option-text);
+}
+
+.mainButton {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    min-width: max-content;
+
+    padding: 10px 15px;
+
+    background-color: var(--color-main-green);
+
+    border-radius: var(--radius-small);
+
+    overflow: hidden;
+
+    transform-origin: left;
+
+    transition: 0.15s ease-in-out;
+
+    &Content {
+        display: flex;
+
+        align-items: center;
+
+        gap: 8px;
+
+        transition: transform 0.15s ease;
+    }
+
+    &:hover &Content {
+        transform: scale(1.08);
+    }
+
+    &:active &Content {
+        transform: scale(1.08);
+    }
+}
+
+.mainFeatures {
+    margin-top: 16px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    width: 100%;
+}
+
+.mainFeatureCard {
+    width: 90%;
+
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 100px 10px 10px;
+
+    background-color: var(--color-card-bg);
+
+    border-radius: var(--radius-medium);
+
+    color: var(--color-main-text);
+
+    transition: 0.15s ease-in-out;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    img {
+        width: 40px;
+        height: 40px;
+
+        display: inline-block;
+    }
+}
+
+@media (min-width: 800px) {
+    .mainTitleSection {
+        width: 500px;
+
+        margin-left: 150px;
+        margin-right: auto;
+
+        margin-top: 80px;
+
+        gap: 50px;
+
+        align-items: flex-start;
+
+        text-align: left;
+    }
+
+    .mainButton {
+        min-width: 100%;
+
+        height: 50px;
+
+        font-size: var(--text-xl);
+    }
+
+    .mainFeatures {
+        margin-top: 80px;
+
+        margin-left: 100px;
+
+        width: 90%;
+
+        flex-direction: row;
+
+        gap: 20px;
+
+        font-size: var(--text-xl);
+
+        padding-right: 70px;
+
+        padding-left: 30px;
+    }
+
+    .mainFeatureCard {
+        padding: 25px;
+
+        img {
+            width: 50px;
+            height: 50px;
+        }
+    }
+}
