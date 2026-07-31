@@ -12,8 +12,19 @@ import PreferenceSection from '@/features/searchFilters/ui/PreferenceSection.js'
 
 import styles from './FiltersPage.module.scss';
 
+const FILTER_ORDER = ['location', 'budget', 'preferences'] as const;
+type FilterKey = (typeof FILTER_ORDER)[number];
+
+const FILTER_LABELS: Record<FilterKey, string> = {
+    location: 'Локация',
+    budget: 'Бюджет',
+    preferences: 'Категории',
+};
+
 const FiltersPage = () => {
     const navigate = useNavigate();
+
+    const [currentFilter, setCurrentFilter] = useState<FilterKey>('location');
     const [isErrorDismissed, setIsErrorDismissed] = useState<boolean>(false);
     const [locationError, setLocationError] = useState<{
         city?: string;
@@ -28,7 +39,7 @@ const FiltersPage = () => {
     const {
         data: cities,
         isLoading: isCitiesLoading,
-        error: error,
+        error,
     } = useQuery({
         queryKey: ['cities'],
         queryFn: getAllCities,
@@ -44,7 +55,11 @@ const FiltersPage = () => {
         return rest?.locations.map((item) => item.address) ?? [];
     };
 
-    const onSubmit = () => {
+    const currentIndex = FILTER_ORDER.indexOf(currentFilter);
+    const isFirstFilter = currentIndex === 0;
+    const isLastFilter = currentIndex === FILTER_ORDER.length - 1;
+
+    const validateLocation = () => {
         const locationErrors: typeof locationError = {};
         if (filters.cityName.length === 0) locationErrors.city = 'Необходимо выбрать город!';
         if (filters.restaurantName.length === 0)
@@ -53,11 +68,29 @@ const FiltersPage = () => {
 
         if (Object.keys(locationErrors).length > 0) {
             setLocationError(locationErrors);
+            return false;
+        }
+        setLocationError({});
+        return true;
+    };
+
+    const goToNextFilter = () => {
+        if (currentFilter === 'location' && !validateLocation()) return;
+
+        if (isLastFilter) {
+            navigate('/dishlist');
             return;
         }
 
-        setLocationError({});
-        navigate('/dishlist');
+        setCurrentFilter(FILTER_ORDER[currentIndex + 1]);
+    };
+
+    const goToPrevFilter = () => {
+        if (isFirstFilter) {
+            navigate(-1);
+            return;
+        }
+        setCurrentFilter(FILTER_ORDER[currentIndex - 1]);
     };
 
     return (
@@ -79,68 +112,87 @@ const FiltersPage = () => {
                 </h1>
 
                 <div className={styles.filtersProgressBar}>
-                    <span className={styles.filtersProgressPoint}>1</span>
-                    <span> Фильтры &mdash; </span>
-                    <span className={styles.filtersProgressPoint}>2</span>
-                    <span> Результаты</span>
+                    {FILTER_ORDER.map((key, index) => (
+                        <span key={key} className={styles.filtersProgressGroup}>
+                            <span
+                                className={`${styles.filtersProgressLabel} ${
+                                    currentFilter === key ? styles.filtersProgressLabelActive : ''
+                                }`}
+                            >
+                                {FILTER_LABELS[key]}
+                            </span>
+                            {index < FILTER_ORDER.length - 1 && (
+                                <span className={styles.filtersProgressDivider}>&mdash;</span>
+                            )}
+                        </span>
+                    ))}
                 </div>
             </div>
 
             <div className={styles.filtersMain}>
-                <LocationSection
-                    city={{
-                        value: filters.cityName,
-                        options: cities || [],
-                        setValue: (value) => update({ cityName: value }),
-                    }}
+                <button className={styles.prevFilterButton} onClick={goToPrevFilter}>
+                    <ArrowLeft />
+                </button>
 
-                    restaurant={{
-                        value: filters.restaurantName,
-                        options: restaurants?.map((item) => item.name) || [],
-                        setValue: (value) => update({ restaurantName: value }),
-                    }}
+                <div className={styles.filterContent}>
+                    {currentFilter === 'location' && (
+                        <LocationSection
+                            city={{
+                                value: filters.cityName,
+                                options: cities || [],
+                                setValue: (value) => update({ cityName: value }),
+                            }}
+                            restaurant={{
+                                value: filters.restaurantName,
+                                options: restaurants?.map((item) => item.name) || [],
+                                setValue: (value) => update({ restaurantName: value }),
+                            }}
+                            address={{
+                                value: filters.address,
+                                options: getAddresses(),
+                                setValue: (value) => update({ address: value }),
+                            }}
+                            citiesLoad={isCitiesLoading}
+                            restaurantsLoad={isRestaurantsLoading}
+                            error={locationError}
+                        />
+                    )}
 
-                    address={{
-                        value: filters.address,
-                        options: getAddresses(),
-                        setValue: (value) => update({ address: value }),
-                    }}
+                    {currentFilter === 'budget' && (
+                        <BudgetSection
+                            budget={{
+                                value: filters.budget,
+                                change: (value) => update({ budget: value }),
+                            }}
+                            personCount={{
+                                value: filters.personCount,
+                                change: (value) => update({ personCount: value }),
+                            }}
+                        />
+                    )}
 
-                    citiesLoad={isCitiesLoading}
-                    restaurantsLoad={isRestaurantsLoading}
-                    error={locationError}
-                />
+                    {currentFilter === 'preferences' && (
+                        <PreferenceSection
+                            optimizeModes={{
+                                value: filters.mode,
+                                setValue: (value) => toggleArrays('mode', value),
+                            }}
+                            chosenCategories={{
+                                value: filters.desiredCategories,
+                                setValue: (value) => toggleArrays('desiredCategories', value),
+                            }}
+                            excludedCategories={{
+                                value: filters.excludedCategories,
+                                setValue: (value) => toggleArrays('excludedCategories', value),
+                            }}
+                        />
+                    )}
+                </div>
 
-                <PreferenceSection
-                    optimizeModes={{
-                        value: filters.mode,
-                        setValue: (value) => toggleArrays('mode', value),
-                    }}
-                    chosenCategories={{
-                        value: filters.desiredCategories,
-                        setValue: (value) => toggleArrays('desiredCategories', value),
-                    }}
-                    excludedCategories={{
-                        value: filters.excludedCategories,
-                        setValue: (value) => toggleArrays('excludedCategories', value),
-                    }}
-                />
-
-                <BudgetSection
-                    budget={{
-                        value: filters.budget,
-                        change: (value) => update({ budget: value }),
-                    }}
-                    personCount={{
-                        value: filters.personCount,
-                        change: (value) => update({ personCount: value }),
-                    }}
-                />
+                <button className={styles.filtersNextButton} onClick={goToNextFilter}>
+                    {isLastFilter ? 'Подтвердить' : 'Далее'} <ArrowRightIcon />
+                </button>
             </div>
-
-            <button className={styles.filtersFinishButton} onClick={onSubmit}>
-                Подтвердить <ArrowRightIcon />
-            </button>
         </>
     );
 };
