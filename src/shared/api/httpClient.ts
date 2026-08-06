@@ -1,5 +1,5 @@
 class httpClient {
-    static #BASE_URL = 'http://localhost:5001/api/';
+    static #BASE_URL = import.meta.env.VITE_API_URL;
 
     static async get<T>(endPoint: string, init?: string): Promise<T> {
         const response = await fetch(`${this.#BASE_URL}${endPoint}${init ? '?' + init : ''}`);

@@ -30,7 +30,7 @@ const LocationSection = ({
         <section className={styles.filterSection}>
             <div>
                 <label className={styles.filterLabel} htmlFor="citySelect">
-                    1. Выберите город
+                    1. Выберите город (обязательно):
                 </label>
                 <select
                     id="citySelect"
@@ -61,7 +61,7 @@ const LocationSection = ({
 
             <div>
                 <label className={styles.filterLabel} htmlFor="restaurantSelect">
-                    2. Выберите ресторан
+                    2. Выберите ресторан (обязательно):
                 </label>
                 <select
                     id="restaurantSelect"
@@ -92,7 +92,7 @@ const LocationSection = ({
 
             <div>
                 <label className={styles.filterLabel} htmlFor="addressSelect">
-                    3. Выберите адрес ресторана
+                    3. Выберите адрес ресторана (обязательно):
                 </label>
                 <select
                     id="addressSelect"

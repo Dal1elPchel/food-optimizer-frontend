@@ -50,6 +50,7 @@ export default tseslint.config(
             // Imports
             'simple-import-sort/imports': 'error',
             'simple-import-sort/exports': 'error',
+            '@typescript-eslint/no-unused-vars': 'off',
         },
     },
 );

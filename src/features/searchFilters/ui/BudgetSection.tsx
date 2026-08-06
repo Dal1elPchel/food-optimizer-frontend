@@ -8,13 +8,14 @@ interface Field<T> {
 interface BudgetProps {
     budget: Field<number>;
     personCount: Field<number>;
+    count: Field<number>;
 }
 
-const BudgetSection = ({ budget, personCount }: BudgetProps) => {
+const BudgetSection = ({ budget, personCount, count }: BudgetProps) => {
     return (
         <section className={styles.filterSection}>
             <div>
-                <label className={styles.filterLabel}>6. Введите бюджет:</label>
+                <label className={styles.filterLabel}>4. Введите бюджет:</label>
 
                 <div>
                     <input
@@ -41,7 +42,7 @@ const BudgetSection = ({ budget, personCount }: BudgetProps) => {
 
                 <div className={styles.budgetLabel}>{budget.value}</div>
 
-                <label className={styles.filterLabel}>7. Сколько человек:</label>
+                <label className={styles.filterLabel}>5. Сколько человек:</label>
 
                 <div className={styles.peopleCount}>
                     <button
@@ -57,6 +58,30 @@ const BudgetSection = ({ budget, personCount }: BudgetProps) => {
                     <button
                         onClick={() => {
                             personCount.change(Math.min(20, personCount.value + 1));
+                        }}
+                    >
+                        +
+                    </button>
+                </div>
+
+                <label className={styles.filterLabel}>
+                    6. количество вариантов (необязательно):
+                </label>
+
+                <div className={styles.peopleCount}>
+                    <button
+                        onClick={() => {
+                            count.change(Math.max(1, count.value - 1));
+                        }}
+                    >
+                        -
+                    </button>
+
+                    <span>{count.value}</span>
+
+                    <button
+                        onClick={() => {
+                            count.change(Math.min(20, count.value + 1));
                         }}
                     >
                         +

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { restaurantQueryParams } from '@/entities/restaurant/api/queryParams';
 import { getAllCities } from '@/features/searchFilters/api/getAllCities';
 import { useFilterStore } from '@/features/searchFilters/model/search.store';
+import { Category, OptimizeMode } from '@/features/searchFilters/model/SearchFilters';
 import BudgetSection from '@/features/searchFilters/ui/BudgetSection.js';
 import LocationSection from '@/features/searchFilters/ui/LocationSection.js';
 import PreferenceSection from '@/features/searchFilters/ui/PreferenceSection.js';
@@ -20,6 +21,15 @@ const FILTER_LABELS: Record<FilterKey, string> = {
     budget: 'Бюджет',
     preferences: 'Категории',
 };
+interface Field<T> {
+    value: T[];
+    setValue: (arg0: T) => void;
+}
+interface Preference {
+    optimizeModes: Field<OptimizeMode>;
+    chosenCategories: Field<Category>;
+    excludedCategories: Field<Category>;
+}
 
 const FiltersPage = () => {
     const navigate = useNavigate();
@@ -34,7 +44,42 @@ const FiltersPage = () => {
 
     const filters = useFilterStore((state) => state.filters);
     const update = useFilterStore((state) => state.update);
-    const toggleArrays = useFilterStore((state) => state.toggleArrayItems);
+    const updatePersonCount = useFilterStore((state) => state.setPersonCount);
+
+    const toggleInPerson = <
+        K extends 'satiationLevels' | 'desiredCategories' | 'excludedCategories',
+    >(
+        index: number,
+        key: K,
+        value: (typeof filters.generalPreferences)[number][K][number],
+    ) => {
+        const next = filters.generalPreferences.map((person, i) => {
+            if (i !== index) return person;
+            const list = person[key] as unknown[];
+            return {
+                ...person,
+                [key]: list.includes(value)
+                    ? list.filter((item) => item !== value)
+                    : [...list, value],
+            };
+        });
+        update({ generalPreferences: next });
+    };
+
+    const generalPreferences: Preference[] = filters.generalPreferences.map((person, index) => ({
+        optimizeModes: {
+            value: person.satiationLevels,
+            setValue: (value) => toggleInPerson(index, 'satiationLevels', value),
+        },
+        chosenCategories: {
+            value: person.desiredCategories,
+            setValue: (value) => toggleInPerson(index, 'desiredCategories', value),
+        },
+        excludedCategories: {
+            value: person.excludedCategories,
+            setValue: (value) => toggleInPerson(index, 'excludedCategories', value),
+        },
+    }));
 
     const {
         data: cities,
@@ -50,9 +95,20 @@ const FiltersPage = () => {
     );
 
     const showError = error && !isErrorDismissed;
-    const getAddresses = () => {
+
+    const getAllRests = () => {
         const rest = restaurants?.find((item) => item.name === filters.restaurantName);
-        return rest?.locations.map((item) => item.address) ?? [];
+        return rest?.locations ?? [];
+    };
+
+    const getAddresses = () => {
+        const allRests = getAllRests();
+        return allRests.map((item) => item.address);
+    };
+
+    const getAddressIdOnName = (address: string) => {
+        const allRests = getAllRests();
+        return allRests.find((item) => item.address === address)?.id;
     };
 
     const currentIndex = FILTER_ORDER.indexOf(currentFilter);
@@ -150,7 +206,11 @@ const FiltersPage = () => {
                             address={{
                                 value: filters.address,
                                 options: getAddresses(),
-                                setValue: (value) => update({ address: value }),
+                                setValue: (value) =>
+                                    update({
+                                        address: value,
+                                        addressId: getAddressIdOnName(value),
+                                    }),
                             }}
                             citiesLoad={isCitiesLoading}
                             restaurantsLoad={isRestaurantsLoading}
@@ -166,26 +226,17 @@ const FiltersPage = () => {
                             }}
                             personCount={{
                                 value: filters.personCount,
-                                change: (value) => update({ personCount: value }),
+                                change: (value) => updatePersonCount(value),
+                            }}
+                            count={{
+                                value: filters.count,
+                                change: (value) => update({ count: value }),
                             }}
                         />
                     )}
 
                     {currentFilter === 'preferences' && (
-                        <PreferenceSection
-                            optimizeModes={{
-                                value: filters.mode,
-                                setValue: (value) => toggleArrays('mode', value),
-                            }}
-                            chosenCategories={{
-                                value: filters.desiredCategories,
-                                setValue: (value) => toggleArrays('desiredCategories', value),
-                            }}
-                            excludedCategories={{
-                                value: filters.excludedCategories,
-                                setValue: (value) => toggleArrays('excludedCategories', value),
-                            }}
-                        />
+                        <PreferenceSection generalPreferences={generalPreferences} />
                     )}
                 </div>
 

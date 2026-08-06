@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import {
@@ -15,75 +15,119 @@ interface Field<T> {
     setValue: (arg0: T) => void;
 }
 
-interface PreferenceProps {
+interface Preference {
     optimizeModes: Field<OptimizeMode>;
     chosenCategories: Field<Category>;
     excludedCategories: Field<Category>;
 }
 
-const PreferenceSection = ({
-    optimizeModes,
-    chosenCategories,
-    excludedCategories,
-}: PreferenceProps) => {
-    const [excludedCategoriesOpen, setExcludedCategoriesOpen] = useState(false);
+interface PreferenceProps {
+    generalPreferences: Preference[];
+}
+
+const PreferenceSection = ({ generalPreferences }: PreferenceProps) => {
+    const [personCount, setPersonCount] = useState(1);
+    const [excludedOpen, setExcludedOpen] = useState<Record<number, boolean>>({});
+
+    const toggleExcludedOpen = (index: number) =>
+        setExcludedOpen((prev) => ({ ...prev, [index]: !prev[index] }));
+
+    const addPerson = () => {
+        if (personCount < generalPreferences.length) {
+            setPersonCount((prev) => prev + 1);
+        }
+    };
+
+    const removePerson = (index: number) => {
+        setPersonCount(index);
+    };
 
     return (
         <section className={styles.filterSection}>
-            <div>
-                <label className={styles.filterLabel}>4. Выберите режим (не обязательно):</label>
-                <div className={styles.modeChose}>
-                    {modes.map((item) => (
-                        <label key={item} className={styles.filterOption}>
-                            <input
-                                type="checkbox"
-                                checked={optimizeModes.value.includes(item)}
-                                onChange={() => optimizeModes.setValue(item)}
-                            />
-                            <span>{item}</span>
-                        </label>
-                    ))}
-                </div>
+            {generalPreferences.slice(0, personCount).map((person, index) => {
+                const { optimizeModes, chosenCategories, excludedCategories } = person;
 
-                <label className={styles.filterLabel}>
-                    5. Выберите категории (не обязательно):
-                </label>
-                <div className={styles.categoryChose}>
-                    {categories.map((item) => (
-                        <label key={item} className={styles.filterOption}>
-                            <input
-                                type="checkbox"
-                                checked={chosenCategories.value.includes(item)}
-                                onChange={() => chosenCategories.setValue(item)}
-                            />
-                            <span>{item}</span>
-                        </label>
-                    ))}
-                </div>
-                <button onClick={() => setExcludedCategoriesOpen(!excludedCategoriesOpen)}>
-                    <label className={`${styles.filterLabel} ${styles.excludedCategoryChose}`}>
-                        Исключить категории (не обязательно):
-                        {excludedCategoriesOpen ? <ChevronUp /> : <ChevronDown />}
-                    </label>
-                </button>
+                return (
+                    <div key={index} className={styles.personBlock}>
+                        <div className={styles.personHeader}>
+                            <span className={styles.personTitle}>Человек {index + 1}</span>
+                            {index > 0 && (
+                                <button
+                                    type="button"
+                                    className={styles.removePersonBtn}
+                                    onClick={() => removePerson(index)}
+                                    aria-label="Убрать"
+                                >
+                                    <Minus size={16} />
+                                </button>
+                            )}
+                        </div>
 
-                {excludedCategoriesOpen && (
-                    <>
-                        <div className={styles.categoryChose}>
-                            {categories.map((item) => (
+                        <label className={styles.filterLabel}>
+                            7. Выберите режим (не обязательно):
+                        </label>
+                        <div className={styles.modeChose}>
+                            {modes.map((item) => (
                                 <label key={item} className={styles.filterOption}>
                                     <input
                                         type="checkbox"
-                                        checked={excludedCategories.value.includes(item)}
-                                        onChange={() => excludedCategories.setValue(item)}
+                                        checked={optimizeModes.value.includes(item)}
+                                        onChange={() => optimizeModes.setValue(item)}
                                     />
                                     <span>{item}</span>
                                 </label>
                             ))}
                         </div>
-                    </>
-                )}
-            </div>
+
+                        <label className={styles.filterLabel}>
+                            8. Выберите категории (не обязательно):
+                        </label>
+                        <div className={styles.categoryChose}>
+                            {categories.map((item) => (
+                                <label key={item} className={styles.filterOption}>
+                                    <input
+                                        type="checkbox"
+                                        checked={chosenCategories.value.includes(item)}
+                                        onChange={() => chosenCategories.setValue(item)}
+                                    />
+                                    <span>{item}</span>
+                                </label>
+                            ))}
+                        </div>
+
+                        <button type="button" onClick={() => toggleExcludedOpen(index)}>
+                            <label
+                                className={`${styles.filterLabel} ${styles.excludedCategoryChose}`}
+                            >
+                                9. Исключить категории (не обязательно):
+                                {excludedOpen[index] ? <ChevronUp /> : <ChevronDown />}
+                            </label>
+                        </button>
+
+                        {excludedOpen[index] && (
+                            <div className={styles.categoryChose}>
+                                {categories.map((item) => (
+                                    <label key={item} className={styles.filterOption}>
+                                        <input
+                                            type="checkbox"
+                                            checked={excludedCategories.value.includes(item)}
+                                            onChange={() => excludedCategories.setValue(item)}
+                                        />
+                                        <span>{item}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+
+            {personCount < generalPreferences.length && (
+                <button type="button" className={styles.addPersonBtn} onClick={addPerson}>
+                    <Plus size={18} />
+                    Добавить человека
+                </button>
+            )}
         </section>
     );
 };

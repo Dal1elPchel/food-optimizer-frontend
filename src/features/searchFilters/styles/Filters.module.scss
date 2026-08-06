@@ -135,6 +135,77 @@
   color: var(--color-main-text);
 }
 
+.personBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--color-option-text);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.personHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.personTitle {
+  color: var(--color-main-text);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-md);
+}
+
+.removePersonBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 26px;
+  height: 26px;
+
+  background-color: var(--color-control-bg);
+  color: var(--color-option-text);
+
+  border-radius: var(--radius-small);
+
+  cursor: pointer;
+  transition: 0.15s ease-in-out;
+
+  &:hover {
+    background-color: var(--color-error-text);
+    color: var(--color-main-text);
+  }
+}
+
+.addPersonBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 12px;
+
+  background-color: transparent;
+  color: var(--color-main-green);
+
+  border: 1px dashed var(--color-main-green);
+  border-radius: var(--radius-medium);
+
+  cursor: pointer;
+  transition: 0.15s ease-in-out;
+
+  &:hover {
+    background-color: var(--color-main-green);
+    color: var(--color-main-text);
+  }
+}
+
 /* BUDGET */
 
 .budgetInput {
